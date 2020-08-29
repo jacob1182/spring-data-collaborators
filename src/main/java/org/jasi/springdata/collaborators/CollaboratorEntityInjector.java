@@ -30,9 +30,9 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static org.jasi.springdata.collaborators.ProxyUtils.getProxyTarget;
+import static org.jasi.springdata.collaborators.ReflectionUtils.setFieldValue;
 
 /**
  * Collaborator entity registry
@@ -108,17 +108,5 @@ public class CollaboratorEntityInjector {
         return Stream.of(entityClass.getDeclaredFields())
                 .filter(isCollaborator)
                 .collect(toList());
-    }
-
-    private <T> void setFieldValue(T entity, Field field, Object collaborator) {
-        try {
-            boolean accessibility = field.isAccessible();
-            field.setAccessible(true);
-            field.set(entity, collaborator);
-            field.setAccessible(accessibility);
-
-        } catch (IllegalAccessException e) {
-            logger.error(format("Impossible to inject collaborator on %s.%s. Reason: %s", field.getDeclaringClass().getSimpleName(), field.getName(), e.getMessage()));
-        }
     }
 }

@@ -15,8 +15,15 @@
  */
 package org.jasi.springdata.collaborators;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+
+import static java.lang.String.format;
 
 /**
  * Reflection Utility class
@@ -24,6 +31,7 @@ import java.lang.reflect.Type;
  * @author @jacob1182
  */
 class ReflectionUtils {
+    private static final Log logger = LogFactory.getLog(ReflectionUtils.class);
 
     static Class<?> firstGenericArgumentType(Class<?> genericInterface, Class<?> target) {
 
@@ -45,6 +53,30 @@ class ReflectionUtils {
 
         return null;
     }
+
+    static <T> void setFieldValue(T entity, Field field, Object value) {
+        try {
+            boolean accessibility = field.isAccessible();
+            field.setAccessible(true);
+            field.set(entity, value);
+            field.setAccessible(accessibility);
+
+        } catch (IllegalAccessException e) {
+            logger.error(format("Impossible to inject collaborator on %s.%s. Reason: %s", field.getDeclaringClass().getSimpleName(), field.getName(), e.getMessage()));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    static <T> T getFieldValue(InvocationHandler invocationHandler, String fieldName) throws IllegalAccessException {
+        Field advisedField = org.springframework.util.ReflectionUtils.findField(invocationHandler.getClass(), fieldName);
+
+        boolean accessibility = advisedField.isAccessible();
+        org.springframework.util.ReflectionUtils.makeAccessible(advisedField);
+        T value = (T) advisedField.get(invocationHandler);
+        advisedField.setAccessible(accessibility);
+        return value;
+    }
+
 
     private static ParameterizedType from(Class<?> genericInterface, Type type) {
 

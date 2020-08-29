@@ -16,7 +16,7 @@ import java.lang.reflect.Proxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@ContextConfiguration(classes = {CollaboratorApplication.class})
+@ContextConfiguration(classes = CollaboratorTestConfig.class)
 @RunWith(SpringRunner.class)
 public class CollaboratorEntityInjectorTest {
 
