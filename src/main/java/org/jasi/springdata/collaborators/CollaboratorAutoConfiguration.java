@@ -16,11 +16,18 @@
 package org.jasi.springdata.collaborators;
 
 import org.jasi.springdata.collaborators.providers.EntityProviderBeanPostProcessor;
-import org.jasi.springdata.collaborators.providers.EntityProviderMatcher;
+import org.jasi.springdata.collaborators.providers.EntityProviderMatcherRegistry;
+import org.jasi.springdata.collaborators.providers.matchers.CustomEntityProviderMatcher;
+import org.jasi.springdata.collaborators.providers.matchers.EntityProviderMatcher;
+import org.jasi.springdata.collaborators.providers.matchers.RepositoryEntityProviderMatcher;
+import org.jasi.springdata.collaborators.providers.matchers.ThirdPartyEntityProviderMatcher;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.repository.Repository;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -32,12 +39,28 @@ import java.util.function.Supplier;
 public class CollaboratorAutoConfiguration {
 
     @Bean
-    public EntityProviderBeanPostProcessor persistenceBeanPostProcessor(ApplicationContext context, EntityProviderMatcher entityProviderMatcher) {
-        return new EntityProviderBeanPostProcessor(context, entityProviderMatcher);
+    public EntityProviderBeanPostProcessor persistenceBeanPostProcessor(ApplicationContext context, EntityProviderMatcherRegistry entityProviderMatcherRegistry) {
+        return new EntityProviderBeanPostProcessor(context, entityProviderMatcherRegistry);
     }
 
     @Bean
-    public EntityProviderMatcher entityProviderMatcher(Supplier<Class<?>[]> collaboratorProviders) {
-        return new EntityProviderMatcher(collaboratorProviders.get());
+    public EntityProviderMatcherRegistry entityProviderMatcher(List<EntityProviderMatcher> entityProviderMatchers) {
+        return new EntityProviderMatcherRegistry(entityProviderMatchers);
+    }
+
+    @Bean
+    public CustomEntityProviderMatcher customEntityProviderMatcher() {
+        return new CustomEntityProviderMatcher();
+    }
+
+    @Bean
+    @ConditionalOnClass(Repository.class)
+    public RepositoryEntityProviderMatcher repositoryEntityProviderMatcher() {
+        return new RepositoryEntityProviderMatcher();
+    }
+
+    @Bean
+    public ThirdPartyEntityProviderMatcher thirdPartyEntityProviderMatcher(Supplier<Class<?>[]> collaboratorProviders) {
+        return new ThirdPartyEntityProviderMatcher(collaboratorProviders.get());
     }
 }

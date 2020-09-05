@@ -30,12 +30,12 @@ import static org.jasi.springdata.collaborators.ProxyUtils.createProxy;
 public class EntityProviderBeanPostProcessor implements BeanPostProcessor {
 
     private final CollaboratorInjectorHandler injectorHandler;
-    private final EntityProviderMatcher entityProviderMatcher;
+    private final EntityProviderMatcherRegistry entityProviderMatcherRegistry;
 
 
-    public EntityProviderBeanPostProcessor(ApplicationContext context, EntityProviderMatcher entityProviderMatcher) {
+    public EntityProviderBeanPostProcessor(ApplicationContext context, EntityProviderMatcherRegistry entityProviderMatcherRegistry) {
         this.injectorHandler = new CollaboratorInjectorHandler(context);
-        this.entityProviderMatcher = entityProviderMatcher;
+        this.entityProviderMatcherRegistry = entityProviderMatcherRegistry;
     }
 
     @Override
@@ -46,7 +46,7 @@ public class EntityProviderBeanPostProcessor implements BeanPostProcessor {
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
 
-        return entityProviderMatcher.matches(bean)
+        return entityProviderMatcherRegistry.matches(bean)
             ? createEntityProviderProxy(bean)
             : bean;
     }
