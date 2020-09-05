@@ -1,10 +1,7 @@
 package org.jasi.springdata.collaborators.providers;
 
 import org.jasi.springdata.collaborators.CollaboratorTestConfig;
-import org.jasi.springdata.collaborators.domain.JsonStoreInfoService;
-import org.jasi.springdata.collaborators.domain.Order;
-import org.jasi.springdata.collaborators.domain.OrderFileReader;
-import org.jasi.springdata.collaborators.domain.OrderRepository;
+import org.jasi.springdata.collaborators.domain.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +24,9 @@ public class EntityProviderBeanPostProcessorTest {
 
     @Autowired
     private OrderFileReader orderFileReader;
+
+    @Autowired
+    private OrderCustomEntityProvider orderCustomEntityProvider;
 
     private final Consumer<Order> hasCollaborators = order -> {
         assertThat(order.getNotificationService()).isNotNull();
@@ -56,8 +56,20 @@ public class EntityProviderBeanPostProcessorTest {
     }
 
     @Test
-    public void shouldAddCollaboratorWhenUsingEntityProvider() {
+    public void shouldAddCollaboratorWhenUsingEntityProviderInterface() {
+        assertThat(orderFileReader.readAll())
+            .allSatisfy(hasCollaborators);
+    }
+
+    @Test
+    public void shouldAddCollaboratorWhenUsingEntityProviderInterfaceAndWrappers() {
         assertThat(orderFileReader.readNext().getData())
-            .satisfies(hasCollaborators);
+                .satisfies(hasCollaborators);
+    }
+
+    @Test
+    public void shouldAddCollaboratorWhenUsingEntityProviderAnnotation() {
+        assertThat(orderCustomEntityProvider.getOrder())
+                .satisfies(hasCollaborators);
     }
 }
