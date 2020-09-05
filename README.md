@@ -1,14 +1,24 @@
-# Content
+# Spring Data Collaborator
+
+Spring Data Collaborator provides a solution to inject collaborators to your domain model when retrieving them from an external provider, such us Repository, RestTemplate or a custom provider.
+
+This module is completely customizable.
+
+#### Acknowledgment
+After applying DDD approach you wil find that Domain models sometimes needs collaborator instances to accomplish its purpose. The best way to deal with it is to separate your Domain model from the Data model and inject the dependencies during the creation of your Domain model, but it may introduce duplication of code on both models, and you have to maintain them every time one of them change.
+
+A messy solution is to use the same model for both scenarios. This will solve the DRY violation but introduces Single responsibility principle violation because the now unique model have to behave as a Domain model and as a Data model at the same time. In the case that Data model has a different behavior than the Domain model it will become too complex to maintain.
+
+For simple scenarios when your model has no complex Data model behavior, and the Data model comply with the Domain model, you can use the second approach. But, unfortunately ORMs and other providers are not able to inject beans to the model. That is the purpose of this module.
+
+## Features
 - [Usage](#usage)
     - [@Collaborator](#collaborator)
     - [@Qualifiers](#qualifiers)
     - [EntityFactory](#entityfactory)
 - [Entity Providers](#entity-provider)
-    - [Repositories](#repositories)
-    - [RestTemplate](#resttemplate)
-    - [Custom Providers](#custom-providers)
-        - [EntityProvider](#entityprovider)
-        - [Third-Party Providers](#third-party-providers)
+    - [Default Entity Providers](#default-entity-providers)
+    - [Custom Entity Providers](#custom-providers)
 - [Wrapper injectors](#wrapper-injectors)
     - [Supported wrapper injectors](#supported-wrapper-injectors)
     - [Custom wrapper injectors](#custom-wrapper-injectors)
@@ -18,13 +28,49 @@
 - [Performance Considerations](#performance-considerations)  
        
 ## Usage
+
 ### @Collaborator
+
+Use the `@Collaborator` annotation to specify the property to be injected
+```java
+@Document
+public class Order {
+
+    @Id
+    private String id;
+
+    private String name;
+
+    @Collaborator
+    private NotificationService notificationService;
+}
+```
 
 ### @Qualifiers
 
+Use `@Qualifiers` annotation to specify the bean name to inject
+
+```java
+@Document
+public class Order {
+
+    @Id
+    private String id;
+
+    private String name;
+
+    @Collaborator
+    private NotificationService notificationService;
+
+    @Collaborator
+    @Qualifier("jsonStoreInfoService")
+    private StoreInfoService storeInfo;
+}
+```
+
 ### EntityFactory
 
-Useful whenever is needed a more complex entity reconstitution.
+Use EntityFactory interface for complexer entity reconstitution.
 ```java
 @Component
 public class OrderItemFactory implements EntityFactory<OrderItem> {
@@ -46,7 +92,6 @@ public class OrderItemFactory implements EntityFactory<OrderItem> {
 When performing operations over a model provider, it will use the `OrderItemFactory` to reconstitutes the `OrderItem` element.
  
 ```java
-
 class OrderItemFactoryTest {
 
     OrderItemRepository repository; // the model provider
@@ -59,36 +104,58 @@ class OrderItemFactoryTest {
                         assertNotNull(orderItem.getDependentService()));
     }
 }
-
 ```
-
 
 ## Entity Providers
 
+Spring Data Collaborators intercept provider's returned values and inject the collaborator instances into them. Some providers are supported by default.
 
-### Repositories
+_Note: Providers should be a spring bean instance._
 
-- Repository interface
-- Any class annotated with @Repository
-- 
+### Default Entity Providers
+- Beans that implements `Repository` interface or is annotated with `@Repository`
+- `RestTemplate`s
 
-Note it doesn't work for  
-### RestTemplate
+### Custom Entity Providers
 
+For personalized entity providers is possible to do it in 3 ways
+- Implementing the `EntityProvider` interface
+- Adding the `@EntityProvider` annotation
+- Register them using the `@CollaboratorConfig` annotation for configuration class
 
-### Custom Providers
+The last case is useful when the entity provider class is in a third party library.
+  
+__Using the `EntityProvider` inteface__
+```java
+@Component
+public class OrderFileReader implements EntityProvider {
 
+    public Order[] readAll() {
+        //...
+    }
+}
+```
 
-#### EntityProvider
-#### Third-Party Providers
+__Using the `@EntityProvider` annotation__
+```java
+@Component
+@EntityProvider
+public class OrderFileReader {
+
+    public Order[] readAll() {
+        //...
+    }
+}
+```
+__Using the `@CollaboratorConfig` annotation for third party entity providers__
 ```java
 @Configuration
 @CollaboratorConfig(
-    providers = {OrderFileProvider.class, MongoTemplate.class},
-    injectors = {CustomInjector.class}
+    providers = {OrderFileProvider.class, MongoTemplate.class}
 )
 public class Configuration {}
 ```
+
 ## Wrapper Injectors
 
 Injectors are to inject collaborators into the entity.
@@ -108,7 +175,6 @@ By default, there are some supported wrapper injectors for the following wrapper
 ### Custom Wrapper Injectors
 
 For non-supported wrappers
-
 
 ```java
 @Component
