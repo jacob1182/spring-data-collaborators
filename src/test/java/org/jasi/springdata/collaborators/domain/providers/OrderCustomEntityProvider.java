@@ -1,6 +1,7 @@
-package org.jasi.springdata.collaborators.domain;
+package org.jasi.springdata.collaborators.domain.providers;
 
 import org.jasi.springdata.collaborators.annotation.EntityProvider;
+import org.jasi.springdata.collaborators.domain.Order;
 import org.springframework.stereotype.Component;
 
 @Component

@@ -1,7 +1,12 @@
 package org.jasi.springdata.collaborators.providers;
 
 import org.jasi.springdata.collaborators.CollaboratorTestConfig;
-import org.jasi.springdata.collaborators.domain.*;
+import org.jasi.springdata.collaborators.domain.JsonStoreInfoService;
+import org.jasi.springdata.collaborators.domain.Order;
+import org.jasi.springdata.collaborators.domain.OrderRepository;
+import org.jasi.springdata.collaborators.domain.providers.OrderCustomEntityProvider;
+import org.jasi.springdata.collaborators.domain.providers.OrderFileReader;
+import org.jasi.springdata.collaborators.domain.providers.OrderThirdPartyEntityProvider;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +32,9 @@ public class EntityProviderBeanPostProcessorTest {
 
     @Autowired
     private OrderCustomEntityProvider orderCustomEntityProvider;
+
+    @Autowired
+    private OrderThirdPartyEntityProvider orderThirdPartyEntityProvider;
 
     private final Consumer<Order> hasCollaborators = order -> {
         assertThat(order.getNotificationService()).isNotNull();
@@ -70,6 +78,12 @@ public class EntityProviderBeanPostProcessorTest {
     @Test
     public void shouldAddCollaboratorWhenUsingEntityProviderAnnotation() {
         assertThat(orderCustomEntityProvider.getOrder())
+                .satisfies(hasCollaborators);
+    }
+
+    @Test
+    public void shouldAddCollaboratorWhenUsingEntityProviderFromThirdParty() {
+        assertThat(orderThirdPartyEntityProvider.getOrder())
                 .satisfies(hasCollaborators);
     }
 }

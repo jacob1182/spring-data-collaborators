@@ -3,7 +3,7 @@ package org.jasi.springdata.collaborators.injectors;
 import org.jasi.springdata.collaborators.CollaboratorTestConfig;
 import org.jasi.springdata.collaborators.domain.JsonStoreInfoService;
 import org.jasi.springdata.collaborators.domain.Order;
-import org.jasi.springdata.collaborators.domain.OrderFileReader;
+import org.jasi.springdata.collaborators.domain.providers.OrderFileReader;
 import org.jasi.springdata.collaborators.domain.OrderRepository;
 import org.junit.After;
 import org.junit.Before;

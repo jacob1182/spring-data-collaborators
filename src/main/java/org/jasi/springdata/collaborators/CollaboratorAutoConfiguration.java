@@ -17,11 +17,11 @@ package org.jasi.springdata.collaborators;
 
 import org.jasi.springdata.collaborators.providers.EntityProviderBeanPostProcessor;
 import org.jasi.springdata.collaborators.providers.EntityProviderMatcher;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.repository.Repository;
+
+import java.util.function.Supplier;
 
 /**
  * Collaborator auto configuration
@@ -29,12 +29,15 @@ import org.springframework.data.repository.Repository;
  * @author @jacob1182
  */
 @Configuration
-@ConditionalOnClass(Repository.class)
 public class CollaboratorAutoConfiguration {
 
     @Bean
-    public EntityProviderBeanPostProcessor persistenceBeanPostProcessor(ApplicationContext context) {
-        EntityProviderMatcher entityProviderMatcher = new EntityProviderMatcher();
+    public EntityProviderBeanPostProcessor persistenceBeanPostProcessor(ApplicationContext context, EntityProviderMatcher entityProviderMatcher) {
         return new EntityProviderBeanPostProcessor(context, entityProviderMatcher);
+    }
+
+    @Bean
+    public EntityProviderMatcher entityProviderMatcher(Supplier<Class<?>[]> collaboratorProviders) {
+        return new EntityProviderMatcher(collaboratorProviders.get());
     }
 }
