@@ -1,4 +1,4 @@
-package org.jasi.springdata.collaborators.domain.injectors;
+package org.jasi.springdata.collaborators.domain.wrappers;
 
 import java.util.List;
 

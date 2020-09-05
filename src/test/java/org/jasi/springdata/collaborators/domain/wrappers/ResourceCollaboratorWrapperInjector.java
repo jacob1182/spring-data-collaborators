@@ -1,4 +1,4 @@
-package org.jasi.springdata.collaborators.domain.injectors;
+package org.jasi.springdata.collaborators.domain.wrappers;
 
 import org.jasi.springdata.collaborators.injectors.CollaboratorInjector;
 import org.jasi.springdata.collaborators.injectors.wrapper.CollaboratorWrapperInjector;

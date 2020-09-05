@@ -1,6 +1,6 @@
 package org.jasi.springdata.collaborators.domain;
 
-import org.jasi.springdata.collaborators.domain.injectors.Resource;
+import org.jasi.springdata.collaborators.domain.wrappers.Resource;
 import org.jasi.springdata.collaborators.providers.EntityProvider;
 import org.springframework.stereotype.Component;
 
