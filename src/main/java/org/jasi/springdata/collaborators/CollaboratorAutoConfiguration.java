@@ -15,17 +15,16 @@
  */
 package org.jasi.springdata.collaborators;
 
+import org.jasi.springdata.collaborators.injectors.wrapper.ResponseEntityCollaboratorWrapperInjector;
 import org.jasi.springdata.collaborators.providers.EntityProviderBeanPostProcessor;
 import org.jasi.springdata.collaborators.providers.EntityProviderMatcherRegistry;
-import org.jasi.springdata.collaborators.providers.matchers.CustomEntityProviderMatcher;
-import org.jasi.springdata.collaborators.providers.matchers.EntityProviderMatcher;
-import org.jasi.springdata.collaborators.providers.matchers.RepositoryEntityProviderMatcher;
-import org.jasi.springdata.collaborators.providers.matchers.ThirdPartyEntityProviderMatcher;
+import org.jasi.springdata.collaborators.providers.matchers.*;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.repository.Repository;
+import org.springframework.web.client.RestOperations;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -54,13 +53,25 @@ public class CollaboratorAutoConfiguration {
     }
 
     @Bean
+    public ThirdPartyEntityProviderMatcher thirdPartyEntityProviderMatcher(Supplier<Class<?>[]> collaboratorProviders) {
+        return new ThirdPartyEntityProviderMatcher(collaboratorProviders.get());
+    }
+
+    @Bean
     @ConditionalOnClass(Repository.class)
     public RepositoryEntityProviderMatcher repositoryEntityProviderMatcher() {
         return new RepositoryEntityProviderMatcher();
     }
 
     @Bean
-    public ThirdPartyEntityProviderMatcher thirdPartyEntityProviderMatcher(Supplier<Class<?>[]> collaboratorProviders) {
-        return new ThirdPartyEntityProviderMatcher(collaboratorProviders.get());
+    @ConditionalOnClass(RestOperations.class)
+    public RestOperationsEntityProviderMatcher restOperationsEntityProviderMatcher() {
+        return new RestOperationsEntityProviderMatcher();
+    }
+
+    @Bean
+    @ConditionalOnClass(RestOperations.class)
+    public ResponseEntityCollaboratorWrapperInjector responseEntityCollaboratorWrapperInjector() {
+        return new ResponseEntityCollaboratorWrapperInjector();
     }
 }

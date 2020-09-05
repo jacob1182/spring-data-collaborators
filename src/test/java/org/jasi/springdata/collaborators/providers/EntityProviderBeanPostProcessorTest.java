@@ -14,6 +14,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.function.Consumer;
 
@@ -35,6 +36,9 @@ public class EntityProviderBeanPostProcessorTest {
 
     @Autowired
     private OrderThirdPartyEntityProvider orderThirdPartyEntityProvider;
+
+    @Autowired
+    private RestTemplate restTemplate;
 
     private final Consumer<Order> hasCollaborators = order -> {
         assertThat(order.getNotificationService()).isNotNull();
@@ -66,7 +70,7 @@ public class EntityProviderBeanPostProcessorTest {
     @Test
     public void shouldAddCollaboratorWhenUsingEntityProviderInterface() {
         assertThat(orderFileReader.readAll())
-            .allSatisfy(hasCollaborators);
+                .allSatisfy(hasCollaborators);
     }
 
     @Test
@@ -84,6 +88,18 @@ public class EntityProviderBeanPostProcessorTest {
     @Test
     public void shouldAddCollaboratorWhenUsingEntityProviderFromThirdParty() {
         assertThat(orderThirdPartyEntityProvider.getOrder())
+                .satisfies(hasCollaborators);
+    }
+
+    @Test
+    public void shouldAddCollaboratorWhenUsingRestTemplate() {
+        assertThat(restTemplate.getForObject("http://invalid.server", Order.class))
+                .satisfies(hasCollaborators);
+    }
+
+    @Test
+    public void shouldAddCollaboratorWhenUsingRestTemplateWithWrapper() {
+        assertThat(restTemplate.getForEntity("http://invalid.server", Order.class).getBody())
                 .satisfies(hasCollaborators);
     }
 }

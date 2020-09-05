@@ -15,8 +15,14 @@
  */
 package org.jasi.springdata.collaborators;
 
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.jasi.springdata.collaborators.domain.Order;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Load beans into the context
@@ -26,4 +32,22 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ComponentScan(basePackages = "org.jasi.springdata.collaborators")
 public class CollaboratorTestConfig {
+
+    @Bean
+    public RestTemplate testRestTemplate() {
+        return ProxyUtils.createProxy(new RestTemplate(), true, new MethodInterceptor() {
+            @Override
+            public Object invoke(MethodInvocation methodInvocation) throws Throwable {
+                Class<?> resultClass = methodInvocation.getMethod().getReturnType();
+
+                if (resultClass.isAssignableFrom(Object.class))
+                    return Order.of("Onion");
+
+                if(resultClass.isAssignableFrom(ResponseEntity.class))
+                    return ResponseEntity.ok(Order.of("Onion"));
+
+                return null;
+            }
+        });
+    }
 }
